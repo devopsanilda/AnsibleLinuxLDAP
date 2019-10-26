@@ -35,8 +35,8 @@
       blockinfile:
         path: /etc/sudoers.d/sudoers
         block: |
-          %devops@intertech.denizbank.com    ALL=(ALL)       ALL
-          %Sistem@intertech.denizbank.com    ALL=(ALL)       ALL
+          %devops@* * *.com    ALL=(ALL)       ALL
+          %Sistem@* * *.com    ALL=(ALL)       ALL
       ignore_errors: yes
 
     - name: Delete below lines
@@ -51,7 +51,7 @@
     - name: Added lines to sssd.conf 
       blockinfile:
         path: /etc/sssd/sssd.conf
-        insertafter: "[domain/intertech.denizbank.com]"
+        insertafter: "[domain/* * *.com]"
         block: | 
           use_fully_qualified_names = False
           fallback_homedir = /home/%u
