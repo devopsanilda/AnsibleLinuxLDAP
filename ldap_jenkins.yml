@@ -6,22 +6,22 @@
       include_tasks: yumrepo.yml
  
     - name: install necessary packeges to authenticate with AD
-      command: yum install -y --enablerepo=IntertechCentOSRepository*  sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python nss-pam-ldapd 
-      ignore_errors: yes
+      command: yum install -y  sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python nss-pam-ldapd 
+      
 
     - name: LDAP authentication activate
-      shell: authconfig --updateall --enableldap --enableldapauth --disableldaptls --ldapserver=ldap://intdc16.intertech.denizbank.com  --ldapbasedn="OU=LINUX,OU=Non Windows Servers,OU=INTER AppServers,DC=intertech,DC=denizbank,DC=com"
-      ignore_errors: yes
+      shell: authconfig --updateall --enableldap --enableldapauth --disableldaptls --ldapserver=ldap://* * *.com  --ldapbasedn="OU=LINUX,OU=Non Windows Servers,OU=AppServers,DC=* * *,DC=* * *,DC=com"
+     
 
     - name: Take linux to domain 
-      shell: echo {{svc_tfdomjoin}} | realm join --computer-ou="OU=LINUX,OU=Non Windows Servers,OU=INTER AppServers,DC=intertech,DC=denizbank,DC=com"  -U svc_tfdomjoin intdc16.intertech.denizbank.com
-      ignore_errors: yes
+      shell: echo {{svc_tfdomjoin}} | realm join --computer-ou="OU=LINUX,OU=Non Windows Servers,OU=AppServers,DC=* * *,DC=* * *,DC=com"  -U svc_tfdomjoin ***.com
+      
 
     - name: firstly deny all domain users
       shell: realm deny --all
     
     - name: permit only  sistem and devops grups to login for dev,uat,preprod servers
-      shell: realm permit -g devops_sec@intertech.denizbank.com  SecSANSistem@intertech.denizbank.com  ASY_Prod_BT_Uygulama_Yonetimi@intertech.denizbank.com
+      shell: realm permit -g devops@* * *.com  Sistem@* * *.com 
 
     - stat:
         path: /etc/sudoers.d/sudoers
@@ -31,12 +31,12 @@
       when: sudo.stat.exists
  
 
-    - name: dev,uat ve preprod sunucuları için  devops_sec grubuna sudo yetkisi 
+    - name: dev,uat ve preprod sunucuları için  devops grubuna sudo yetkisi 
       blockinfile:
         path: /etc/sudoers.d/sudoers
         block: |
-          %devops_sec@intertech.denizbank.com    ALL=(ALL)       ALL
-          %SecSANSistem@intertech.denizbank.com    ALL=(ALL)       ALL
+          %devops@intertech.denizbank.com    ALL=(ALL)       ALL
+          %Sistem@intertech.denizbank.com    ALL=(ALL)       ALL
       ignore_errors: yes
 
     - name: Delete below lines
