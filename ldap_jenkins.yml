@@ -1,4 +1,4 @@
-- hosts: devlinuxenvanter
+- hosts: linuxenvanter
   gather_facts: no
   ignore_errors: false
   tasks:
