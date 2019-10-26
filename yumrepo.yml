@@ -7,33 +7,33 @@
 
 
     - stat:
-        path: /etc/yum.repos.d/IntertechCentOSRepository-Base.repo
+        path: /etc/yum.repos.d/* * *Base.repo
       register: result
 
     - name: Copy files repository to remote server
       copy:
-        src: /etc/yum.repos.d/IntertechCentOSRepository-Base.repo
-        dest: /etc/yum.repos.d/IntertechCentOSRepository-Base.repo
+        src: /etc/yum.repos.d/* * *Base.repo
+        dest: /etc/yum.repos.d/* * *Base.repo
       when: result.stat.exists==false
 
     - stat:
-        path: /etc/yum.repos.d/IntertechCentOSRepository-Extras.repo
+        path: /etc/yum.repos.d/* * *Extras.repo
       register: result1
 
     - name: Copy files repository to remote server
       copy:
-        src: /etc/yum.repos.d/IntertechCentOSRepository-Extras.repo
-        dest: /etc/yum.repos.d/IntertechCentOSRepository-Extras.repo
+        src: /etc/yum.repos.d/* * *Extras.repo
+        dest: /etc/yum.repos.d/* * *Extras.repo
       when: result1.stat.exists==false
 
     - stat:
-        path: /etc/yum.repos.d/IntertechCentOSRepository-Updates.repo
+        path: /etc/yum.repos.d/* * *Updates.repo
       register: result2
 
     - name: Copy files repository to remote server
       copy:
-        src: /etc/yum.repos.d/IntertechCentOSRepository-Updates.repo
-        dest: /etc/yum.repos.d/IntertechCentOSRepository-Updates.repo
+        src: /etc/yum.repos.d/* * *Updates.repo
+        dest: /etc/yum.repos.d/* * *Updates.repo
       when: result2.stat.exists==false
 
 
