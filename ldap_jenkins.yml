@@ -1,0 +1,63 @@
+- hosts: devlinuxenvanter
+  gather_facts: no
+  ignore_errors: false
+  tasks:
+    - name: call yumrepo playbook
+      include_tasks: yumrepo.yml
+ 
+    - name: install necessary packeges to authenticate with AD
+      command: yum install -y --enablerepo=IntertechCentOSRepository*  sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python nss-pam-ldapd 
+      ignore_errors: yes
+
+    - name: LDAP authentication activate
+      shell: authconfig --updateall --enableldap --enableldapauth --disableldaptls --ldapserver=ldap://intdc16.intertech.denizbank.com  --ldapbasedn="OU=LINUX,OU=Non Windows Servers,OU=INTER AppServers,DC=intertech,DC=denizbank,DC=com"
+      ignore_errors: yes
+
+    - name: Take linux to domain 
+      shell: echo {{svc_tfdomjoin}} | realm join --computer-ou="OU=LINUX,OU=Non Windows Servers,OU=INTER AppServers,DC=intertech,DC=denizbank,DC=com"  -U svc_tfdomjoin intdc16.intertech.denizbank.com
+      ignore_errors: yes
+
+    - name: firstly deny all domain users
+      shell: realm deny --all
+    
+    - name: permit only  sistem and devops grups to login for dev,uat,preprod servers
+      shell: realm permit -g devops_sec@intertech.denizbank.com  SecSANSistem@intertech.denizbank.com  ASY_Prod_BT_Uygulama_Yonetimi@intertech.denizbank.com
+
+    - stat:
+        path: /etc/sudoers.d/sudoers
+      register: sudo
+
+    - shell: touch /etc/sudoers.d/sudoers 
+      when: sudo.stat.exists
+ 
+
+    - name: dev,uat ve preprod sunucuları için  devops_sec grubuna sudo yetkisi 
+      blockinfile:
+        path: /etc/sudoers.d/sudoers
+        block: |
+          %devops_sec@intertech.denizbank.com    ALL=(ALL)       ALL
+          %SecSANSistem@intertech.denizbank.com    ALL=(ALL)       ALL
+      ignore_errors: yes
+
+    - name: Delete below lines
+      lineinfile:
+        path: /etc/sssd/sssd.conf
+        state: absent
+        line: '{{ item }}'
+      with_items:
+        - use_fully_qualified_names = True
+        - fallback_homedir = /home/%u@%d
+
+    - name: Added lines to sssd.conf 
+      blockinfile:
+        path: /etc/sssd/sssd.conf
+        insertafter: "[domain/intertech.denizbank.com]"
+        block: | 
+          use_fully_qualified_names = False
+          fallback_homedir = /home/%u
+
+    - name: Restart service sssd to get changes
+      service:
+        name: sssd
+        state: restarted
+        enabled: yes

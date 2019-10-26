@@ -1,0 +1,41 @@
+  
+    - shell: cat /etc/yum.conf
+      register: yum_contents
+ 
+    - shell: echo "sslverify=false" >> /etc/yum.conf
+      when: yum_contents.stdout.find('sslverify=false') == -1
+
+
+    - stat:
+        path: /etc/yum.repos.d/IntertechCentOSRepository-Base.repo
+      register: result
+
+    - name: Copy files repository to remote server
+      copy:
+        src: /etc/yum.repos.d/IntertechCentOSRepository-Base.repo
+        dest: /etc/yum.repos.d/IntertechCentOSRepository-Base.repo
+      when: result.stat.exists==false
+
+    - stat:
+        path: /etc/yum.repos.d/IntertechCentOSRepository-Extras.repo
+      register: result1
+
+    - name: Copy files repository to remote server
+      copy:
+        src: /etc/yum.repos.d/IntertechCentOSRepository-Extras.repo
+        dest: /etc/yum.repos.d/IntertechCentOSRepository-Extras.repo
+      when: result1.stat.exists==false
+
+    - stat:
+        path: /etc/yum.repos.d/IntertechCentOSRepository-Updates.repo
+      register: result2
+
+    - name: Copy files repository to remote server
+      copy:
+        src: /etc/yum.repos.d/IntertechCentOSRepository-Updates.repo
+        dest: /etc/yum.repos.d/IntertechCentOSRepository-Updates.repo
+      when: result2.stat.exists==false
+
+
+  
+
