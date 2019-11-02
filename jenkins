@@ -1,0 +1,51 @@
+// Define variables
+def ProjectName="LinuxLdap"
+def NodeName = "master"
+//Notification Variables
+def SuccessMail="adalkilic@ku.edu.tr"
+def FailMail="adalkilic@ku.du.tr"
+
+//pipeline
+pipeline {
+    agent { node { label "${master}" } }
+
+    environment {
+        PATH = "/usr/local/bin:$PATH"
+    }
+
+    stages {        
+       
+        stage('Check Playbook') {
+            steps {
+                sh '''
+				 date
+				 echo  "Target hosts: devlinuxenvanter"
+				 pwd
+				 sudo ls -la /etc/ansible/linuxldap/ldap_jenkins.yml 
+				 sudo ls -la  
+				 '''
+            }
+        }
+		
+		
+		stage('Linux Authentication with Active Directory') {
+            steps {
+                sh '''
+			echo ${sistempasswd} |  sudo ansible-playbook /etc/ansible/linuxldap/ldap_jenkins.yml -i /etc/ansible/linuxldap/devlinuxenvanter  -e svc_tfdomjoin=${svc_tfdomjoin} -b -K  
+			    '''
+            }
+        }
+}        
+    post {
+        success {
+                mail (to: "${SuccessMail}",
+                    subject: "${ProjectName} Success",
+                    body: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) published success");  
+        }
+        failure {
+                mail (to: "${FailMail}",
+                    subject: "${ProjectName} Failure",
+                    body: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) published failure");  
+        }
+    }
+}
